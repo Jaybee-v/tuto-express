@@ -1,37 +1,17 @@
 import express from "express";
+import morgan from "morgan";
+import usersRoute from "./routes/users.routes.js";
 
 const app = express();
 
-const USERS = [
-  {
-    id: 1,
-    name: "John",
-    age: 34,
-  },
-  {
-    id: 2,
-    name: "Jane",
-    age: 25,
-  },
-];
+app.use(express.json());
+app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
   res.send("Hello world, installation de nodemon !");
 });
 
-app.get("/users", (req, res) => {
-  res.send(JSON.stringify(USERS));
-});
-
-app.get("/users/:id", (req, res) => {
-  const id = req.params.id;
-  console.log(id);
-  const user = USERS.find((user) => user.id === parseInt(id));
-  if (!user) {
-    res.status(404).send("Utilisateur non trouvé");
-  }
-  res.send(JSON.stringify(user));
-});
+app.use("/users", usersRoute);
 
 const PORT = process.env.PORT || 8787;
 
