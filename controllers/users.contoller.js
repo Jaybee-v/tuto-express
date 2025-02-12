@@ -1,40 +1,65 @@
-import UsersService from "../services/users.service.js";
+import UserService from "../services/userService.js";
 
-const usersService = new UsersService();
+const service = new UserService();
 
-export default class UsersController {
-  index(req, res) {
-    const users = usersService.findAll();
-    res.status(200).json(users);
+export const getUsers = (req, res) => {
+  const users = service.findAll();
+  res.json(users);
+};
+
+export const getUserById = (req, res) => {
+  const { id } = req.params;
+  const user = service.findById(parseInt(id));
+  if (!user) {
+    res.status(404).json({
+      message: "User not found",
+    });
+    return;
   }
+  res.json(user);
+};
 
-  show(req, res) {
-    const { id } = req.params;
-    const user = usersService.findById(parseInt(id));
-    if (!user) {
-      res.status(404).json({
-        message: "User not found",
-      });
-    }
-    res.status(200).json(user);
+export const createUser = (req, res) => {
+  const { name, age } = req.body;
+  const createdUser = service.createUser({ name, age });
+  if (!createdUser) {
+    res.status(404).json({
+      message: "An error occured",
+    });
+    return;
   }
+  res.status(201).json({
+    message: "User created successfully",
+    user: createdUser,
+  });
+};
 
-  create(req, res) {
-    const { name, age } = req.body;
-    const result = usersService.create({ name, age });
-    res.status(201).json(result);
+export const updateUser = (req, res) => {
+  const { id } = req.params;
+  const { name, age } = req.body;
+  const updatedUser = service.updateUser(parseInt(id), { name, age });
+  if (!updatedUser) {
+    res.status(404).json({
+      message: "An error occured",
+    });
+    return;
   }
+  res.json({
+    message: "User updated successfully",
+    user: updatedUser,
+  });
+};
 
-  update(req, res) {
-    const { id } = req.params;
-    const { name, age } = req.body;
-    const result = usersService.update(parseInt(id), { name, age });
-    res.status(200).json(result);
+export const deleteUser = (req, res) => {
+  const { id } = req.params;
+  const isDeleted = service.deleteUser(parseInt(id));
+  if (!isDeleted) {
+    res.status(404).json({
+      message: "You cant delete this account",
+    });
+    return;
   }
-
-  delete(req, res) {
-    const { id } = req.params;
-    const result = usersService.delete(parseInt(id));
-    res.status(200).json(result);
-  }
-}
+  res.json({
+    message: "user deleted successfully",
+  });
+};

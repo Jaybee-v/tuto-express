@@ -1,50 +1,60 @@
-import fs from "fs";
+// findAll()
+// findById()
+import { readUsers, writeUsers } from "../utils/fileHelper.js";
 
-const USERS = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
+class UserService {
+  // CREATE
+  createUser({ name, age }) {
+    // id number
+    // name string
+    // age number
+    if (name === "" || !age) {
+      return null;
+    }
+    const users = this.findAll();
+    const newUser = {
+      id: users.length + 1,
+      name: name,
+      age: age,
+    };
+    users.push(newUser);
+    writeUsers(users);
+    return newUser;
+  }
 
-export default class UsersService {
+  // READ
   findAll() {
-    return USERS;
+    const users = readUsers();
+    return users;
   }
 
   findById(id) {
-    const user = USERS.find((user) => user.id === id);
-    if (!user) {
-      return null;
-    }
+    const users = this.findAll();
+    const user = users.find((u) => u.id === id);
+    if (!user) return null;
     return user;
   }
 
-  create({ name, age }) {
-    const newUser = { id: USERS.length + 1, name, age };
-    USERS.push(newUser);
-    fs.writeFileSync("./data/users.json", JSON.stringify(USERS, null, 2));
-    return {
-      message: "User created successfully",
-      data: newUser,
-    };
-  }
-
-  update(id, { name, age }) {
-    const user = this.findById(id);
-    if (!user) {
-      throw new Error("User cannot be updated");
-    }
+  // UPDATE
+  updateUser(id, { name, age }) {
+    const users = this.findAll();
+    const user = users.find((u) => u.id == id);
+    if (!user) return null;
     user.name = name;
     user.age = age;
-    fs.writeFileSync("./data/users.json", JSON.stringify(USERS, null, 2));
-    return {
-      message: "User updated successfully",
-    };
+    writeUsers(users);
+    return user;
   }
 
-  delete(id) {
-    const user = this.findById(id);
-    if (!user) {
-      throw new Error("User doesnt exists");
-    }
-    const _USERS = USERS.filter((user) => user.id !== id);
-    fs.writeFileSync("./data/users.json", JSON.stringify(_USERS, null, 2));
-    return { message: "User deleted successfully" };
+  // DELETE
+  deleteUser(id) {
+    const users = this.findAll();
+    const user = users.find((u) => u.id == id);
+    if (!user) return false;
+    const _users = users.filter((u) => u.id !== id);
+    writeUsers(_users);
+    return true;
   }
 }
+
+export default UserService;
